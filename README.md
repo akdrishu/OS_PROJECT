@@ -5,11 +5,11 @@ Q3) Write a multithreaded program that implements the banker's algorithm. Create
 # Executing the program
 
 To run this file in Windows.
-Double click on "bankersalgo" file.
+Double click on "bankersalgo.exe" file.
 
 To run this file in Linux.
 Enter the following command(for 64 bit systems):
-wine64 bankersalgo
+wine64 bankersalgo.exe
 
 Enter the following command(for 32/64 bit systems):
-wine bankersalgo
+wine bankersalgo.exe
