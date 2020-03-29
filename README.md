@@ -10,5 +10,6 @@ Double click on "bankersalgo" file.
 To run this file in Linux.
 Enter the following command(for 64 bit systems):
 wine64 bankersalgo
+
 Enter the following command(for 32/64 bit systems):
 wine bankersalgo
