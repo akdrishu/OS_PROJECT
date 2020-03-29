@@ -137,9 +137,7 @@ void *processCode(void *arg) {
     pthread_exit(NULL);
 }
 
-
-int main(int argc, char **argv) {
-
+void get_input() {
     srand(time(NULL));
 
     cout<<"\nNumber of processes? ";
@@ -170,6 +168,9 @@ int main(int argc, char **argv) {
     }
     cout<<endl;
 
+}
+
+void need_matrix() {
     // calculate need matrix
 
     for (ll i = 0; i < no_Processes; i++) {
@@ -177,6 +178,9 @@ int main(int argc, char **argv) {
             need[i][j] = maxRequired[i][j] - allocated[i][j];
     }
 
+}
+
+void solve() {
     // get safe sequence
 
     for (ll i = 0; i < no_Processes; i++) safeSeq[i] = -1;
@@ -192,6 +196,8 @@ int main(int argc, char **argv) {
     }
     cout<<"P"<<safeSeq[no_Processes - 1] + 1;
 
+}
+void Process_Execution(){
 
     cout<<"\nExecuting Processes...\n\n";
     sleep(1);
@@ -210,11 +216,24 @@ int main(int argc, char **argv) {
     for (ll i = 0; i < no_Processes; i++)
         pthread_join(processes[i], NULL);
 
-    printf("\nAll Processes Finished\n");
+    cout<<"\nAll Processes Finished\n";
 
+}
 
+int main(int argc, char **argv) {
+
+    get_input();
+    need_matrix();
+    solve();
+    Process_Execution();
     return 0;
 }
+
+
+
+
+
+
 
 
 
