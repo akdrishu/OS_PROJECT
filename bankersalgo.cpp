@@ -1,4 +1,4 @@
-/* So the objective is to avoid deadlock using bankers's algorithm.
+/* So the objective is to detect deadlock using bankers's algorithm.
  Banker's algorithm states that resource allocation should be done only if the system is in safe state.
  If the system is in unsafe state, there may be chances that there is a deadlock in the system.
  Hence our objective will be to find out if the system is in a safe state or not.
@@ -17,6 +17,99 @@ ll maxRequired[mxn][mxn], need[mxn][mxn], safeSeq[mxn];
 
 pthread_mutex_t lock_Resources;
 pthread_cond_t all_condition;
+
+bool isSafe();
+
+void *Code_Processing(void *arg);
+
+void get_input();
+
+void calculate_needmatrix();
+
+void solve();
+
+void Process_Execution();
+
+int main(int argc, char **argv) {
+
+    get_input();
+    calculate_needmatrix();
+    solve();
+    Process_Execution();
+    return 0;
+
+}
+
+
+/*Funtion to get input values of processes and resources.*/
+
+void get_input() {
+    srand(time(NULL));
+
+    printf("\nNumber of processes? ");
+    scanf("%lld", &no_Processes);
+
+    printf("\nNumber of resources? ");
+    scanf("%lld", &no_Resources);
+
+
+    printf("\nCurrently Available resources (R1 R2 ...Rn)? ");
+    for (ll i = 0; i < no_Resources; i++)
+        scanf("%lld", &avail[i]);
+
+
+    printf("\n");
+    for (ll i = 0; i < no_Processes; i++) {
+        printf("\nResource allocated to process %lld (R1 R2 ...)? ", i + 1);
+        for (ll j = 0; j < no_Resources; j++)
+            scanf("%lld", &allocated[i][j]);
+    }
+    printf("\n");
+
+    // maximum required resources
+    for (ll i = 0; i < no_Processes; i++) {
+        printf("\nMaximum resource required by process %lld (R1 R2 ...)? ", i + 1);
+        for (ll j = 0; j < no_Resources; j++)
+            scanf("%lld", &maxRequired[i][j]);
+    }
+    printf("\n");
+
+
+}
+
+
+/*Function to calculate need matrix
+ * need[i][j]= maxRequired[i][j] - allocated[i][j]*/
+
+void calculate_needmatrix() {
+    // calculate need matrix
+
+    for (ll i = 0; i < no_Processes; i++) {
+        for (ll j = 0; j < no_Resources; j++)
+            need[i][j] = maxRequired[i][j] - allocated[i][j];
+    }
+}
+
+/*Funtion to find out if safe sequence exists or not and further
+ * if safe sequence exists, execute all processes one by one.*/
+
+void solve() {
+    // get safe sequence
+
+    for (ll i = 0; i < no_Processes; i++) safeSeq[i] = -1;
+
+    if (!isSafe()) {
+        printf("\nNo safe sequence detected, hence system may/may not be in deadlock state.\n\n");
+        exit(-1);
+    }
+
+    printf("\n\nSafe Sequence Found : ");
+    for (ll i = 0; i < no_Processes - 1; i++) {
+        printf("P%lld-->", safeSeq[i] + 1);
+    }
+    printf("P%lld", safeSeq[no_Processes - 1] + 1);
+
+}
 
 /*
  Banker's algorithm to find if system is in a safe state or not:
@@ -83,7 +176,8 @@ bool isSafe() {
 
 /*Creating multiple processes outside main and applying locks
  * so that shared data be safe from concurrent access*/
-void *processCode(void *arg) {
+
+void *Code_Processing(void *arg) {
     ll _insafeSeq = *((ll *) arg);
 
     // lock resources
@@ -94,39 +188,43 @@ void *processCode(void *arg) {
         pthread_cond_wait(&all_condition, &lock_Resources);
 
     // process
-    cout<<"\n--> Process "<< _insafeSeq + 1;
-    cout<<("\n\tAllocated : ");
+    printf("\n--> Process %lld", _insafeSeq + 1);
+    printf("\n\tAllocated : ");
     for (ll i = 0; i < no_Resources; i++)
-        cout<<" "<<allocated[_insafeSeq][i];
+        printf("%lld ", allocated[_insafeSeq][i]);
 
-    cout<<"\n\tNeeded    : ";
+    printf("\n\tNeeded    : ");
     for (ll i = 0; i < no_Resources; i++)
-        cout<<" "<<need[_insafeSeq][i];
+        printf("%lld ", need[_insafeSeq][i]);
 
-    cout<<"\n\tAvailable : ";
+    printf("\n\tAvailable : ");
     for (ll i = 0; i < no_Resources; i++)
-        cout<<" "<< avail[i];
+        printf("%lld ", avail[i]);
 
-    cout<<endl;
+    printf("\n");
     sleep(1);
 
-    cout<<"\tResource Allocated!"<<endl;
+    printf("\tResource Allocated!");
+    printf("\n");
     sleep(1);
-    cout<<"\tProcess Code Running...\n";
+    printf("\tProcess Code Running...");
+    printf("\n");
     sleep(5); // process code
-    cout<<"\tProcess Code Completed...\n";
+    printf("\tProcess Code Completed...");
+    printf("\n");
     sleep(1);
-    cout<<"\tProcess Releasing Resource...\n";
+    printf("\tProcess Releasing Resource...");
+    printf("\n");
     sleep(1);
-    cout<<"\tResource Released!";
+    printf("\tResource Released!");
 
     for (ll i = 0; i < no_Resources; i++)
         avail[i] += allocated[_insafeSeq][i];
 
-    cout<<"\n\tNow Available : ";
+    printf("\n\tNow Available : ");
     for (ll i = 0; i < no_Resources; i++)
-        cout<<" "<<avail[i];
-    cout<<endl<<endl;
+        printf("%lld ", avail[i]);
+    printf("\n\n");
 
     sleep(1);
 
@@ -137,69 +235,12 @@ void *processCode(void *arg) {
     pthread_exit(NULL);
 }
 
-void get_input() {
-    srand(time(NULL));
 
-    cout<<"\nNumber of processes? ";
-    cin>>no_Processes;
+/*Funtion for independant process execution one by one. */
 
-    cout<<"\nNumber of resources? ";
-    cin>>no_Resources;
+void Process_Execution() {
 
-
-    cout<<"\nCurrently Available resources (R1 R2 ...Rm)? ";
-    for (ll i = 0; i < no_Resources; i++)
-        cin>>avail[i];
-
-
-    cout<<endl;
-    for (ll i = 0; i < no_Processes; i++) {
-        cout<<"\nResource allocated to process "<<i+1<<" (R1 R2 ...Rm)? ";
-        for (ll j = 0; j < no_Resources; j++)
-            cin>>allocated[i][j];
-    }
-    cout<<endl;
-
-    // maximum required resources
-    for (ll i = 0; i < no_Processes; i++) {
-        cout<<"\nMaximum resource required by process "<<i+1<<" (R1 R2 ...Rm)? ";
-        for (ll j = 0; j < no_Resources; j++)
-            cin>>maxRequired[i][j];
-    }
-    cout<<endl;
-
-}
-
-void need_matrix() {
-    // calculate need matrix
-
-    for (ll i = 0; i < no_Processes; i++) {
-        for (ll j = 0; j < no_Resources; j++)
-            need[i][j] = maxRequired[i][j] - allocated[i][j];
-    }
-
-}
-
-void solve() {
-    // get safe sequence
-
-    for (ll i = 0; i < no_Processes; i++) safeSeq[i] = -1;
-
-    if (!isSafe()) {
-        cout<<"\nNo safe sequence detected, hence system may/may not be in deadlock state.\n\n";
-        exit(-1);
-    }
-
-    cout<<"\n\nSafe Sequence Found : ";
-    for (ll i = 0; i < no_Processes - 1; i++) {
-        cout<<"P"<<safeSeq[i] + 1<<"-->";
-    }
-    cout<<"P"<<safeSeq[no_Processes - 1] + 1;
-
-}
-void Process_Execution(){
-
-    cout<<"\nExecuting Processes...\n\n";
+    printf("\nExecuting Processes...\n\n");
     sleep(1);
 
     // run threads
@@ -211,28 +252,14 @@ void Process_Execution(){
     for (ll i = 0; i < no_Processes; i++) processNumber[i] = i;
 
     for (ll i = 0; i < no_Processes; i++)
-        pthread_create(&processes[i], &attr, processCode, (void *) (&processNumber[i]));
+        pthread_create(&processes[i], &attr, Code_Processing, (void *) (&processNumber[i]));
 
     for (ll i = 0; i < no_Processes; i++)
         pthread_join(processes[i], NULL);
 
-    cout<<"\nAll Processes Finished\n";
+    printf("\nAll Processes Finished\n");
 
 }
-
-int main(int argc, char **argv) {
-
-    get_input();
-    need_matrix();
-    solve();
-    Process_Execution();
-    return 0;
-}
-
-
-
-
-
 
 
 
