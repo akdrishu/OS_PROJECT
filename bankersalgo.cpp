@@ -1,4 +1,4 @@
-/* So the objective is to detect deadlock using bankers's algorithm.
+/* So the objective is to avoid deadlock using bankers's algorithm.
  Banker's algorithm states that resource allocation should be done only if the system is in safe state.
  If the system is in unsafe state, there may be chances that there is a deadlock in the system.
  Hence our objective will be to find out if the system is in a safe state or not.
@@ -7,7 +7,7 @@
 #include <unistd.h>  //for linux
 //#include "Windows.h" //for windows
 #include "thread"
-
+/*if bits/stdc+++.h doesn't work,include all required header files like iostream.h, stdlib.h,time.h,stdio.h,pthread.h,stdbool.h,conio.h*/
 using namespace std;
 typedef long long int ll;
 const ll mxn = 1e2;
@@ -257,22 +257,6 @@ void Process_Execution() {
     for (ll i = 0; i < no_Processes; i++)
         pthread_join(processes[i], NULL);
 
-    printf("\nAll Processes Finished\n");
+    printf("\nAll the Processes have been successfully completed\n");
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
